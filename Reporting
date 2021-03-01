@@ -1,0 +1,282 @@
+
+Sub Prep_Retrieve()
+
+'Turn off screen updating to make it go faster
+    Application.ScreenUpdating = False
+    
+'Unhide Master List Check and Clear Contents
+    Sheets("PS Master List Check").Select
+    ActiveSheet.Range("$A:$FF").AutoFilter Field:=1
+    Columns("A:FF").Select
+    Selection.EntireColumn.Hidden = False
+    Range("C2:FG53").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+    
+'Unhide CS Master List and Clear Contents
+    Sheets("CS Master List Check").Select
+    ActiveSheet.Range("$A:$FF").AutoFilter Field:=1
+    Columns("A:FF").Select
+    Selection.EntireColumn.Hidden = False
+    Range("C2:FG53").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+
+'Clear Reqs
+    Sheets("Reqs").Select
+    Range("A1:BJ1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+    
+'Clear Pending
+    Sheets("Pending").Select
+    Range("A1:BC1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+
+'Clear Offers
+    Sheets("Offers").Select
+    Range("A1:BM1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+    
+'Go back to Master List Check
+    Sheets("PS Master List Check").Select
+    
+'Turn off screen updating to make it go faster
+    Application.ScreenUpdating = True
+    
+End Sub
+
+HC Email:
+Sub HC_Email()
+
+'Macro extracts and moves CS and PS data from HC email to the Report Retreive.
+'Then it filters the ML checks on new hires to add to the Master Lists
+
+'Turn off screen updating to make it go faster
+    Application.ScreenUpdating = False
+
+'Rename the HC email so the macro can flip between workbooks
+    s = ActiveWorkbook.FullName
+    ActiveWorkbook.SaveAs Filename:="HC Email" & ".xlsb", FileFormat:=50
+
+'Open and extract the PS and CS data from the executive pivot and change the tab names
+    Windows("HC Email.xlsb").Activate
+    Sheets("Executive").Select
+    Range("U25").Select
+    Selection.ShowDetail = True
+    Sheets("Sheet1").Select
+    Sheets("Sheet1").Name = "PS Data"
+    Sheets("Executive").Select
+    Range("U15").Select
+    Selection.ShowDetail = True
+    Sheets("Sheet2").Select
+    Sheets("Sheet2").Name = "CS Data"
+
+'Move the data from the HC email to the ML checks in the HC Report Retreive
+    Sheets("PS Data").Select
+    Range("D2:FK2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Windows("Headcount Report Retrieve.xlsb").Activate
+    Sheets("PS Master List Check").Select
+    Range("C2").Select
+    ActiveSheet.Paste
+    
+    Windows("HC Email.xlsb").Activate
+    Sheets("CS Data").Select
+    Range("D2:FK2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Windows("Headcount Report Retrieve.xlsb").Activate
+    Sheets("CS Master List Check").Select
+    Range("C2").Select
+    ActiveSheet.Paste
+ 
+'Change Theater for 3 India Cost Centers in PS Data
+    Sheets("PS Master List Check").Select
+    Dim cell As Range
+    On Error Resume Next
+    For Each cell In Range("AO2:AO2000")
+    If cell.Value = "IN8085900" Or cell.Value = "IN8085902" Or cell.Value = "IN1385902" Then
+    Range("AK" & cell.Row) = "VSD"
+    End If
+    Next cell
+    
+'Drag down PS Column A and B formulas
+    Range("A2:B2").Select
+    Selection.Copy
+    Range("F2").Select
+    Selection.End(xlDown).Select
+    Selection.End(xlToLeft).Select
+    ActiveSheet.Paste
+    Range(Selection, Selection.End(xlUp)).Select
+    ActiveSheet.Paste
+    
+'Filter HC Master List Check on #N/A
+    
+    ActiveSheet.Range("$A$1:$FF$529").AutoFilter Field:=1, Criteria1:="#N/A"
+
+'Hide Sheets to see important information easier
+    Columns("C:E").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("H:Y").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("AA:AB").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("AD:AJ").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("AL:AN").Select
+    Selection.EntireColumn.Hidden = True
+
+'Do the same to CS Master List Check
+    Sheets("CS Master List Check").Select
+
+'Drag CS columns A and B formulas down
+    Sheets("CS Master List Check").Select
+    Range("A2:B2").Select
+    Selection.Copy
+    Range("F2").Select
+    Selection.End(xlDown).Select
+    Selection.End(xlToLeft).Select
+    ActiveSheet.Paste
+    Range(Selection, Selection.End(xlUp)).Select
+    ActiveSheet.Paste
+    
+'Filter HC Master List Check on #N/A
+    ActiveSheet.Range("$A$1:$FF$529").AutoFilter Field:=1, Criteria1:="#N/A"
+
+'Hide Sheets to see important information easier
+    Columns("C:E").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("H:Y").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("AA:AB").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("AD:AJ").Select
+    Selection.EntireColumn.Hidden = True
+    Columns("AL:AN").Select
+    Selection.EntireColumn.Hidden = True
+
+'Go back to Master List Check
+    Sheets("PS Master List Check").Select
+
+'End the pause in screen updating
+Application.ScreenUpdating = True
+
+End Sub
+
+Req Email:
+Sub Req_Email()
+
+'Turn off screen updating to make it go faster
+    Application.ScreenUpdating = False
+
+'Save the workbook as Req Email
+    s = ActiveWorkbook.FullName
+    ActiveWorkbook.SaveAs Filename:="Req Email" & ".xlsb", FileFormat:=50
+
+'Clean Open Req Reports by deleting columns
+    Sheets("Open Req Report Detail").Select
+    Columns("B:B").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("Y:Y").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AP:AQ").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AQ:AQ").Select
+    Selection.Delete Shift:=xlToLeft
+    
+'Filter on only PS, ES, and CS
+    ActiveSheet.ListObjects("Open_Requisition_Report").Range.AutoFilter Field:=60 _
+    , Criteria1:=Array("CS", "ES", "PS"), Operator:=xlFilterValues
+    
+ 'Clean Pending Appr Reports by Deleting Columns
+    Sheets("Pending Appr Report Detail").Select
+    Columns("Q:Q").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AP:AP").Select
+    Selection.Delete Shift:=xlToLeft
+ 
+'Filter on only PS and ES
+    ActiveSheet.ListObjects("Pending_Approval_Report").Range.AutoFilter Field:=53 _
+    , Criteria1:=Array("CS", "ES", "PS"), Operator:=xlFilterValues
+        
+'Clean Offer Report Detail by deleting columns
+    Sheets("Offer Report Detail").Select
+    Columns("B:B").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("V:W").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("X:Y").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AA:AB").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("AX:AY").Select
+    Selection.Delete Shift:=xlToLeft
+        
+'Move Offers Accepted to column M
+    Range("Offers_Report[[#Headers],[Offer Status]]").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ListObject.ListColumns.Add Position:=13
+    
+    Range("Offers_Report[[#Headers],[Offers Accepted]]").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    
+    Range("Offers_Report[[#Headers],[Column1]]").Select
+    ActiveSheet.Paste
+    
+    Range("Offers_Report[[#Headers],[Offers Accepted2]]").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Application.CutCopyMode = False
+    Selection.ListObject.ListColumns(66).Delete
+    
+     
+' Filter on only ES, PS, and CS
+    Sheets("Offer Report Detail").Select
+    ActiveSheet.ListObjects("Offers_Report").Range.AutoFilter Field:=63 _
+    , Criteria1:=Array("CS", "ES", "PS"), Operator:=xlFilterValues
+        
+'Move data from req email to Report Retreive
+    Sheets("Open Req Report Detail").Select
+    Range("A1:BJ1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Windows("Headcount Report Retrieve.xlsb").Activate
+    Sheets("Reqs").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+    
+    Windows("Req Email.xlsb").Activate
+    Sheets("Pending Appr Report Detail").Select
+    Range("A1:BC1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Windows("Headcount Report Retrieve.xlsb").Activate
+    Sheets("Pending").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+    
+    Windows("Req Email.xlsb").Activate
+    Sheets("Offer Report Detail").Select
+    Range("A1:BM1").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Windows("Headcount Report Retrieve.xlsb").Activate
+    Sheets("Offers").Select
+    Range("A1").Select
+    ActiveSheet.Paste
+
+' Save the Report Retreive workbook with the current date
+ActiveWorkbook.Save
+s = ActiveWorkbook.FullName
+ActiveWorkbook.SaveAs Filename:="Headcount Report Retrieve" & " " & Format(Date, "mm.dd.yyyy") & ".xlsb", FileFormat:=50
+
+'Turn off screen updating to make it go faster
+    Application.ScreenUpdating = True
+
+End Sub
