@@ -1,0 +1,77 @@
+Sub Flash_Prep()
+'
+' Flash_Prep Macro
+'
+' Rename the workbook with the current date
+s = ActiveWorkbook.FullName
+ActiveWorkbook.SaveAs Filename:="Flash Data" & " " & Format(Date, "mm.dd.yyyy"), FileFormat:=52
+
+'Clear Data from JE Data
+    Sheets("JE Data").Select
+    Range("B2:N2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+
+'Clear Data from Bookings
+    Sheets("BOOK").Select
+    ActiveSheet.Range("$A:$AA").AutoFilter Field:=27
+    Range("A2:W2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+    
+'Clear Data from Revenue
+    Sheets("REV").Select
+    ActiveSheet.Range("$A:$AI").AutoFilter Field:=31
+    Range("A2:Z2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.ClearContents
+
+'Go back to Bookings
+    Sheets("BOOK").Select
+    Range("A2").Select
+End Sub
+
+Sub Flash_Cleanse()
+'
+' Flash_Cleanse Macro
+'
+    Sheets("BOOK").Select
+    
+ 
+'Change Theater for Unknowns
+    Dim cell As Range
+    On Error Resume Next
+    For Each cell In Range("M:M")
+        If cell.Value = "UN" Or cell.Value = "UNKN" Or cell.Value = "JAPN" Then
+        cell.Value = Range("Z" & cell.Row)
+        End If
+    Next cell
+    
+'Filter Book Internal to Y
+
+ActiveSheet.Range("$A$1:$AA$3474").AutoFilter Field:=27, Criteria1:="Y"
+
+'Go to Rev tab
+
+ Sheets("REV").Select
+
+'Change Theater for Unknowns
+ 
+    Dim cel As Range
+    On Error Resume Next
+    For Each cel In Range("P:P")
+        If cel.Value = "UN" Or cel.Value = "UNKN" Or cel.Value = "JAPN" Then
+        cel.Value = Range("AD" & cel.Row)
+        End If
+    Next cel
+    
+'Filter Rev Internal to Y
+
+ActiveSheet.Range("$A$1:$AI$16906").AutoFilter Field:=31, Criteria1:="Y"
+    
+'Go back to Book Sheet so you can copy and paste
+    
+    Sheets("BOOK").Select
+    
+End Sub
+
