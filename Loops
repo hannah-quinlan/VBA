@@ -1,0 +1,37 @@
+Sub MyMacro()
+Dim Prompt As Variant, NoRecs As Integer, iLoop As Integer
+'Dim Prompt As Variant, NoRecs As Integer, iLoop As Integer
+'Variant can take on any type of values, but its a bit slower
+
+'This clears all contents in the worksheet
+Sheets("Sheet1").UsedRange.ClearContents
+ReDo:
+    Prompt = InputBox("Enter the number of uniform [0,1] observations to generate. Valid responses are between 10 and 100, inclusively.")
+    If IsNumeric(Prompt) Then
+     NoRecs = CInt(Prompt) 'Converts to integer
+      If (NoRecs < 10 Or NoRecs > 100) Then
+        MsgBox ("Enter a number in [10,100]")
+        GoTo ReDo
+    Else
+        GoTo GoodInput
+    End If
+    Else
+    MsgBox ("Enter a numeric value")
+    GoTo ReDo
+    End If
+    
+GoodInput:
+    ActiveSheet.Range("A1").Select
+    ActiveCell.Formula = "=RAND()"
+    ActiveCell.Offset(1, 0).Select 'Offset by 1 Row and 0 Columns and select that as the focus (go down 1)
+    ActiveCell.Formula = "=RAND()"
+    
+    For iLoop = 1 To (NoRecs - 1) 'Since you already put in the first 2 above
+        ActiveCell.Formula = "=RAND()" '"=R[-2]C + R[-1]C" would add 2 cells up +1 cell up.
+        ActiveCell.Offset(1, 0).Select
+    Next iLoop
+
+        ActiveSheet.Range("B1").Select 'display the mean of observations
+        ActiveCell.FormulaR1C1 = "=AVERAGE(C[-1])"
+        ActiveSheet.Range("B2").Select 'standard deviation of the observations
+        ActiveCell.FormulaR1C1 = "=STDEV.S(C[-1])"
