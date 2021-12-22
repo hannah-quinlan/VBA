@@ -1,0 +1,27 @@
+
+//Get all sheets name on active sheet
+
+function getSheetsName(){
+const ss = SpreadsheetApp.getActiveSpreadsheet();
+const sheets = ss.getSheets();
+const name = new Array();
+
+for (var i=0; i<sheets.length;i++)
+name.push([sheets[i].getName()])
+var copy= ss.getActiveSheet().getRange(2,1,sheets.length);
+copy.setValues(name);
+}
+
+//Rename all sheets based on active range in sheet
+
+function renameSheets(){
+try{
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+
+  for (var i=0; i<=sheets.length;i++) {
+    var copy = ss.getActiveSheet().getRange(2+i, 2).getValue();
+    var renameSheet = sheets[i].setName(copy);
+  } 
+}catch(e) {}
+}
