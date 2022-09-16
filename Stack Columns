@@ -1,0 +1,65 @@
+Option Explicit
+ 
+Sub Stack_cols()
+ 
+    On Error GoTo Stack_cols_Error
+     
+    Dim lNoofRows As Long, lNoofCols As Long
+    Dim lLoopCounter As Long, lCountRows As Long
+    Dim sNewShtName As String
+    Dim shtOrg As Worksheet, shtNew As Worksheet
+     
+    'Turn off the screen update to make macro run faster
+    Application.ScreenUpdating = False
+    'Ask for a new sheet name, if not provided use newsht
+    sNewShtName = InputBox("Enter the new worksheet name", "Enter name", "newsht")
+    'Set a sheet variable for the sheet where the data resides
+    Set shtOrg = ActiveSheet
+    'Add a new worksheet, rename it and set it to a variable
+    If Not SheetExists(sNewShtName) Then
+        Worksheets.Add(After:=Worksheets(Worksheets.Count)).Name = sNewShtName
+        Set shtNew = Worksheets(sNewShtName)
+    Else
+        MsgBox "Worksheet name exists. Try again", vbInformation, "Sheet Exists"
+        Exit Sub
+    End If
+     
+    With shtOrg
+        'Get the last column number
+        'Replace .Range("IV1") with .Range("XFD1") for Excel 2007
+        lNoofCols = .Range("IV1").End(xlToLeft).Column
+        'Start a loop to copy and paste data from the first column to the last column
+        For lLoopCounter = 1 To lNoofCols
+        'Count the number of rows in the looping column
+            'Replace .Cells(65536, lLoopCounter) with .Cells(1048576, lLoopCounter) for Excel 2007
+            lNoofRows = .Cells(65536, lLoopCounter).End(xlUp).Row
+            .Range(.Cells(1, lLoopCounter), .Cells(lNoofRows, lLoopCounter)).Copy Destination:=shtNew.Range(shtNew.Cells(lCountRows + 1, 1), shtNew.Cells(lCountRows + lNoofRows, 1))
+            'count the number of rows in the new worksheet
+            lCountRows = lCountRows + lNoofRows
+        Next lLoopCounter
+    End With
+     
+    On Error GoTo 0
+SmoothExit_Stack_cols:
+        Application.ScreenUpdating = True
+        Exit Sub
+     
+Stack_cols_Error:
+' if this gives you an error, make sure that there an ampersand (&) sign, rather than the &amp literal string. the code formatting is an issue
+    MsgBox "Error " & Err.Number & " (" & Err.Description & ") in Sub:Stack_cols"
+    Resume SmoothExit_Stack_cols
+End Sub
+'Check if a worksheet exists or not
+Public Function SheetExists(sShtName As String) As Boolean
+    On Error Resume Next
+     
+    Dim wsSheet As Worksheet, bResult As Boolean
+    bResult = False
+    Set wsSheet = Sheets(sShtName)
+     
+    On Error GoTo 0
+    If Not wsSheet Is Nothing Then
+        bResult = True
+    End If
+    SheetExists = bResult
+End Function
